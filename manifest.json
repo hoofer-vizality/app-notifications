@@ -1,0 +1,7 @@
+{
+  "name": "App Notifications",
+  "version": "1.0.0",
+  "description": "Adds notifications inside the Discord client itself.",
+  "author": "Hoofer#0001",
+  "license": "MIT"
+}
