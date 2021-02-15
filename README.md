@@ -21,3 +21,9 @@ git clone https://github.com/hoofer-vizality/app-notifications
 
 # Issues / Concerns
 Have an issue? Please make a request using our issue format which can be found [here](https://github.com/hoofer-vizality/app-notifications/issues/new?template=ISSUE_TEMPLATE.md), thanks!
+
+
+# Credits
+JS Coding done by the wizard person, [@Hoofer](https://github.com/HooferDevelops)!
+
+Concepts made by the amazing [@Snapperito](https://github.com/Snapperito) (o゜▽゜)o☆
