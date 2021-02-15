@@ -4,11 +4,13 @@ import { Plugin } from '@vizality/entities';
 import { patch, unpatch } from '@vizality/patcher';
 import { getModule } from '@vizality/webpack';
 
-const HeaderComponent = require("./components/HeaderComponent")
+const HeaderComponent = require("./components/HeaderComponent");
+const Settings = require("./components/Settings");
 
 export default class MentionUtilities extends Plugin {
     async start () {
-        this.injectStyles('style.scss');  
+        this.injectStyles('style.scss');
+        this.registerSettings(Settings)  
         // modules
         const makeTextChatNotification = getModule(["makeTextChatNotification"], false);
         const MessageContent = getModule(m => m.type?.displayName == "MessageContent", false);
@@ -19,11 +21,11 @@ export default class MentionUtilities extends Plugin {
         // injectors
         patch("notif-display", makeTextChatNotification, "makeTextChatNotification", (args,res) => {
             var toastId = `app-notif-${Date.now()^12345}`;
-            vizality.api.notices.sendToast(toastId, {
+            var toast = vizality.api.notices.sendToast(toastId, {
                 header: <HeaderComponent avatar={res.icon} text={res.title}/>,
                 timeout: 5000,
-                content: <MessageContent.type message={{...args[1], hasFlag: () => false, isEdited: () => false}} content={parser(args[1].content, true, { channelId: args[0].id })}/>,
-                buttons:[{
+                content: <MessageContent.type message={{...args[1], hasFlag: () => false, isEdited: () => false}} content={parser(args[1].content == "" ? "`[Attachment(s)]`" : args[1].content, true, { channelId: args[0].id })}/>,
+                buttons:this.settings.get("slimToasts", true) == false ? [{
                     text: "Jump to Message",
                     size: "small",
                     color: "green",
@@ -40,8 +42,10 @@ export default class MentionUtilities extends Plugin {
                     onClick: () => {
                         vizality.api.notices.closeToast(toastId);
                     }
-                }]
+                }] : null,
+                position: "BottomRight"
             })
+            console.log(toast);
             return res;
         });
     }
