@@ -14,25 +14,29 @@ export default class MentionUtilities extends Plugin {
         // modules
         const makeTextChatNotification = getModule(["makeTextChatNotification"], false);
         const MessageContent = getModule(m => m.type?.displayName == "MessageContent", false);
-        const transition = getModule(["transitionTo"], false);
+        const transitionTo = getModule(["transitionTo"], false);
         const parseTopic = await getModule(["parseTopic"], true);
-        const parser = parseTopic.parse;
+        var currentToast;
 
         // injectors
         patch("notif-display", makeTextChatNotification, "makeTextChatNotification", (args,res) => {
-            var toastId = `app-notif-${Date.now()^12345}`;
-            var toast = vizality.api.notices.sendToast(toastId, {
+            if (currentToast)
+                vizality.api.notices.closeToast(currentToast);
+
+            currentToast = `app-notif-${Date.now()^12345}`;
+
+            var toast = vizality.api.notices.sendToast(currentToast, {
                 header: <HeaderComponent avatar={res.icon} text={res.title}/>,
-                timeout: 5000,
-                content: <MessageContent.type message={{...args[1], hasFlag: () => false, isEdited: () => false}} content={parser(args[1].content == "" ? "`[Attachment(s)]`" : args[1].content, true, { channelId: args[0].id })}/>,
-                buttons:this.settings.get("slimToasts", true) == false ? [{
+                timeout: this.settings.get("stickyNotifications", false) == true ? null : 5000 * this.settings.get("displayTime", 1) * (this.settings.get("wordCountMultiplier", false) ? Math.max(args[1].content.length/50,1) : 1),
+                content: <MessageContent.type message={{...args[1], hasFlag: () => false, isEdited: () => false}} content={parseTopic.parse(args[1].content == "" ? "`[Attachment(s)]`" : args[1].content, true, { channelId: args[0].id })}/>,
+                buttons: this.settings.get("slimToasts", true) == false ? [{
                     text: "Jump to Message",
                     size: "small",
                     color: "green",
                     look: "filled",
                     onClick: () => {
-                        transition.transitionTo(`/channels/${args[0].guild_id ? args[0].guild_id : `@me`}/${args[1].channel_id}/${args[1].id}`);
-                        vizality.api.notices.closeToast(toastId);
+                        transitionTo.transitionTo(`/channels/${args[0].guild_id ? args[0].guild_id : `@me`}/${args[1].channel_id}/${args[1].id}`);
+                        vizality.api.notices.closeToast(currentToast);
                     }
                 },
                 {
@@ -40,12 +44,11 @@ export default class MentionUtilities extends Plugin {
                     size: "small",
                     look: "ghost",
                     onClick: () => {
-                        vizality.api.notices.closeToast(toastId);
+                        vizality.api.notices.closeToast(currentToast);
                     }
                 }] : null,
                 position: "BottomRight"
             })
-            console.log(toast);
             return res;
         });
     }
