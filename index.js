@@ -7,7 +7,7 @@ import { getModule } from '@vizality/webpack';
 const HeaderComponent = require("./components/HeaderComponent");
 const Settings = require("./components/Settings");
 
-export default class MentionUtilities extends Plugin {
+export default class AppNotifications extends Plugin {
     async start () {
         this.injectStyles('style.scss');
         this.registerSettings(Settings)  
