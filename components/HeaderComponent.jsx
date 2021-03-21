@@ -3,7 +3,6 @@ import React from "react";
 import { Text, Avatar } from "@vizality/components";
 
 export default ({ avatar, text }) => {
-    console.log(avatar)
     return <>
         <Text style={{"margin-bottom": "5px"}}>
             <Avatar 
